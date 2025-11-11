@@ -147,5 +147,5 @@ if __name__ == "__main__":
         device = device,
     )
 
-    print("time_forward_avg: {time_forward_avg}")
-    print("time_backward_avg: {time_backward_avg}")
+    print(f"time_forward_avg: {time_forward_avg}")
+    print(f"time_backward_avg: {time_backward_avg}")
