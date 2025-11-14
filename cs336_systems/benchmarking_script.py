@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import timeit
-
+import yaml
 
 def get_model(
         vocab_size: int,
@@ -104,14 +104,21 @@ def timer(
 
 
 if __name__ == "__main__":
+    model_size_config_path = "configs/model_sizes.yaml"
+    with open(model_size_config_path) as f:
+        model_size_config = yaml.safe_load(f)
+
+    model_size = "small"
+    if model_size not in list(model_size_config.keys()):
+        raise ValueError(f"Not a valid model size predefined name: {model_size}")
+
+    d_model = model_size_config[model_size]["d_model"]
+    d_ff = model_size_config[model_size]["d_ff"]
+    num_layers = model_size_config[model_size]["num_layers"]
+    num_heads = model_size_config[model_size]["num_heads"]
+    rope_theta = 10000
     vocab_size = 10000
     context_length = 512
-    d_model = 768
-    d_ff = 3072
-    num_layers = 12
-    num_heads = 12
-    rope_theta = 10000
-
 
     model = get_model(
         vocab_size = vocab_size,
@@ -123,18 +130,17 @@ if __name__ == "__main__":
         rope_theta = rope_theta
     )
 
-    warmup_steps = 10
-    all_steps = 100
+    warmup_steps = 5
+    all_steps = 10
     if_backward = True
 
     batch_size = 4
     length = context_length
 
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = torch.device("cpu")
-    print(device)
+    device = torch.device("cuda")
+    print(f"Test on {device}")
     
-
     time_forward_avg, time_backward_avg = timer(
         model=model,
         warmup_steps=warmup_steps,
@@ -143,7 +149,6 @@ if __name__ == "__main__":
         batch_size=batch_size,
         length=length,
         vocab_size=vocab_size,
-
         device = device,
     )
 
